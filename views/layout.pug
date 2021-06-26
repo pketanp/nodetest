@@ -13,7 +13,8 @@ html
 				a(href='/') Node Testing
 			nav.my-2.my-md-0.mr-md-3.py-2
 				a.p-2.text-dark.mx-2(href='/') Home
-				a.p-2.text-dark.mx-2(href='/articles/add') Add Articles
+				if user
+					a.p-2.text-dark.mx-2(href='/articles/add') Add Articles
 			if user 
 				a.btn.btn-outline-primary.mx-2(href='/users/logout') Logut
 			else
