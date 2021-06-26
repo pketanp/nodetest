@@ -6,4 +6,4 @@ let articleSchema = mongoose.Schema({
     body: { type: String, require: true },
 });
 
-let Article=module.exports=mongoose.model('Article',articleSchema);
+let Article = (module.exports = mongoose.model("Article", articleSchema));

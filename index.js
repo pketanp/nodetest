@@ -2,9 +2,14 @@ const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
 var bodyParser = require("body-parser");
+const { body, validationResult } = require("express-validator");
+var flash = require("connect-flash");
+var session = require("express-session");
+var passport = require('passport');
+var config = require("./config/database");
 
 // mongodb connection
-mongoose.connect("mongodb://localhost/nodetest");
+mongoose.connect(config.database);
 let db = mongoose.connection;
 
 // db check connection
@@ -17,24 +22,55 @@ db.on("error", function (err) {
     console.log(err);
 });
 
-// init app
-const app = express();
-
 // Article modile connect
 let Article = require("./model/articleModel");
+
+// init app
+const app = express();
 
 // load view engine
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
+
 
 // body parser middleware
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
+// Express session middleware
+app.use(
+    session({
+        secret: "keyboard cat",
+        resave: true,
+        saveUninitialized: true,
+    })
+);
+
+// Express Messages Middleware
+app.use(require("connect-flash")());
+app.use(function (req, res, next) {
+    res.locals.messages = require("express-messages")(req, res);
+    next();
+});
+
+// Express Validator Middleware
+app.use(express.json());
 
 // Set Public folder
 app.use(express.static(path.join(__dirname, "public")));
+
+// passport config
+require('./config/passport')(passport);
+
+// passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.get('*', function( req, res, next){
+	res.locals.user = req.user || null;
+	next();
+});
 
 // home route
 app.get("/", function (req, res) {
@@ -56,82 +92,13 @@ app.get("/", function (req, res) {
     });
 });
 
-// Add article route
-app.get("/articles/add", function (req, res) {
-    res.render("add_article", {
-        title: "Add Article",
-    });
-});
+// Article Router file
+let articles = require("./routes/article");
+app.use("/articles", articles);
 
-// Add submit article route
-app.post("/articles/add", function (req, res) {
-    //console.log("submitted");
-    //console.log(req.body.title);
-    let article = new Article();
-    article.title = req.body.title;
-    article.author = req.body.author;
-    article.body = req.body.body;
-    article.save(function (err) {
-        if (err) {
-            console.log(err);
-            return;
-        } else {
-            res.redirect("/");
-        }
-    });
-    return;
-});
-
-// Get single article
-app.get("/article/:id", function (req, res) {
-    Article.findById(req.params.id, function (err, article) {
-        res.render("article", {
-            article: article,
-        });
-    });
-});
-
-// Edit the single article
-app.get("/article/edit/:id", function (req, res) {
-    Article.findById(req.params.id, function (err, article) {
-        res.render("edit_article", {
-            title: "Edit Article",
-            article: article,
-        });
-    });
-});
-
-// Edit/Update article route
-app.post("/articles/edit/:id", function (req, res) {
-    //console.log("submitted");
-    //console.log(req.body.title);
-    let article = {};
-    article.title = req.body.title;
-    article.author = req.body.author;
-    article.body = req.body.body;
-
-    let query = { _id: req.params.id };
-    Article.update(query, article, function (err) {
-        if (err) {
-            console.log(err);
-            return;
-        } else {
-            res.redirect("/");
-        }
-    });
-    return;
-});
-
-// Delete article route
-app.delete("/article/:id", function (req, res) {
-    let query = { _id: req.params.id };
-    Article.remove(query, function (err) {
-        if (err) {
-            console.log(err);
-        }
-        res.send("Success");
-    });
-});
+// User Router file
+let users = require("./routes/users");
+app.use("/users", users);
 
 // Start Server
 app.listen(3000, function () {
