@@ -1,7 +1,7 @@
 {
-  "name": "p",
+  "name": "pk",
   "version": "1.0.0",
-  "description": "simple knoledge based app",
+  "description": "simple node based app",
   "main": "index.js",
   "scripts": {
     "start": "node index"

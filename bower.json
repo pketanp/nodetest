@@ -1,0 +1,26 @@
+{
+  "name": "pk",
+  "description": "simple node based app",
+  "main": "index.js",
+  "authors": [
+    "pk..."
+  ],
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "app"
+  ],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^4.6.0",
+    "jquery": "^3.6.0"
+  }
+}
